@@ -30,6 +30,7 @@
                     <th class="col-1">#</th>
                     <th>judul</th>
                     <th>kutipan</th>
+                    <th>isi</th>
                     <th class="col-1">aksi</th>
                 </tr>
             </thead>
@@ -38,6 +39,7 @@
                     <td>1</td>
                     <td>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Modi in possimus perspiciatis?</td>
                     <td>Lorem ipsum dolor sit amet consectetur adipisicing elit. Vitae, suscipit?</td>
+                    <th>isi</th>
                     <td>
                     <span class="badge bg-warning">Edit</span>
                     <span class="badge bg-danger">Hapus</span>
@@ -48,12 +50,36 @@
                     $result = pg_query($Koneksi, $query);
                     if ($result) {
                         while ($row = pg_fetch_assoc($result)) {
+
+                            $gambar_url = "";
+                            if (preg_match('/<img[^>]+src="([^">]+)"/i', $row['isi'], $matches)) {
+                                $gambar_url = $matches[1];
+                            }
+
+                            // 2. Ambil Potongan Teks 'isi' Tanpa Tag HTML
+                            $teks_isi = strip_tags($row['isi']);
+                            if (strlen($teks_isi) > 50) {
+                                $teks_isi = substr($teks_isi, 0, 50) . '...';
+                            }
+
                             echo "<tr>";
                             echo "<td>" . $no++ . "</td>";
                             echo "<td>" . htmlspecialchars($row['title']) . "</td>";
                             echo "<td>" . htmlspecialchars($row['kutip']) . "</td>";
-                            echo "<td><a href='edit.php?id=" . $row['id'] . "' class='btn btn-warning'>Edit</a> ";
-                            echo "<a href='hapus.php?id=" . $row['id'] . "' class='btn btn-danger' onclick=\"return confirm('Apakah Anda yakin ingin menghapus data ini?')\">Hapus</a></td>";
+                            echo "<td>";
+                            if (! empty($gambar_url)) {
+                                echo "<div class='d-flex align-items-center gap-2'>";
+                                echo "<img src='" . htmlspecialchars($gambar_url) . "' style='width: 50px; height: 50px; object-fit: cover; border-radius: 4px;'>";
+                                echo "<small class='text-muted'>" . htmlspecialchars($teks_isi) . "</small>";
+                                echo "</div>";
+                            } else {
+                                echo "<small class='text-muted'>" . htmlspecialchars($teks_isi) . "</small>";
+                            }
+                            echo "</td>";
+                            echo "<td>";
+                            echo "<a href='edit.php?id=" . $row['ID'] . "' class='badge bg-warning'>Edit</a> ";
+                            echo "<a href='hapus.php?id=" . $row['ID'] . "' class='badge bg-danger' onclick=\"return confirm('Apakah Anda yakin ingin menghapus data ini?')\">Hapus</a>";
+                            echo "</td>";
                             echo "</tr>";
                         }
                     }
